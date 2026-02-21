@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import Layout from '../../components/Layout.jsx'
 import DifficultyToggle from '../../components/DifficultyToggle.jsx'
 import Celebration from '../../components/Celebration.jsx'
@@ -70,7 +70,7 @@ export default function Polygons() {
     next(d)
   }
 
-  function guess(option) {
+  const guess = useCallback((option) => {
     if (feedback === 'correct') return
     const correct = difficulty === 'easy' ? shape.name : String(shape.sides)
     setSelected(option)
@@ -85,7 +85,24 @@ export default function Polygons() {
     } else {
       setFeedback('wrong')
     }
-  }
+  }, [difficulty, feedback, shape.name, shape.sides, addStar, next])
+
+  useEffect(() => {
+    function onKeyDown(e) {
+      if (feedback === 'correct') return
+      // 1-4 to pick the choice by index
+      if (e.key >= '1' && e.key <= '4') {
+        const idx = parseInt(e.key) - 1
+        if (choices[idx]) guess(choices[idx])
+      }
+      // Also allow direct side count (3-6) if in hard mode
+      if (difficulty === 'hard' && e.key >= '3' && e.key <= '6') {
+        if (choices.includes(e.key)) guess(e.key)
+      }
+    }
+    window.addEventListener('keydown', onKeyDown)
+    return () => window.removeEventListener('keydown', onKeyDown)
+  }, [choices, difficulty, feedback, guess])
 
   const cx = 110, cy = 110, r = 75
   const pts = polygonPoints(cx, cy, r, shape.sides, shape.rotation, shape.irregular)

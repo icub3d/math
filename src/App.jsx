@@ -6,9 +6,11 @@ import WordProblems from './games/WordProblems/index.jsx'
 import TellTime from './games/TellTime/index.jsx'
 import Polygons from './games/Polygons/index.jsx'
 import EqualParts from './games/EqualParts/index.jsx'
+import AsteroidDefender from './games/AsteroidDefender/index.jsx'
 
 const GAMES = [
   { id: 'addition-subtraction', path: '/addition-subtraction', label: '➕➖ Add & Subtract', description: 'Practice adding and subtracting numbers up to 1000', color: 'bg-yellow-300 hover:bg-yellow-400', ready: true },
+  { id: 'asteroid-defender',    path: '/asteroid-defender',    label: '🚀 Asteroid Defender',description: 'Shoot down asteroids by solving math problems', color: 'bg-orange-300 hover:bg-orange-400', ready: true },
   { id: 'word-problems',        path: '/word-problems',        label: '📖 Word Problems',   description: 'Solve fun one and two-step story problems',          color: 'bg-green-300 hover:bg-green-400',  ready: true },
   { id: 'polygons',             path: '/polygons',             label: '🔷 Polygons',        description: 'Identify shapes with 3, 4, 5, and 6 sides',          color: 'bg-blue-300 hover:bg-blue-400',    ready: true },
   { id: 'equal-parts',          path: '/equal-parts',          label: '🍕 Equal Parts',     description: 'Divide circles and rectangles into equal parts',     color: 'bg-pink-300 hover:bg-pink-400',    ready: true },
@@ -59,6 +61,7 @@ export default function App() {
       <Route path="/tell-time" element={<TellTime />} />
       <Route path="/polygons" element={<Polygons />} />
       <Route path="/equal-parts" element={<EqualParts />} />
+      <Route path="/asteroid-defender" element={<AsteroidDefender />} />
     </Routes>
   )
 }

@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import Layout from '../../components/Layout.jsx'
 import DifficultyToggle from '../../components/DifficultyToggle.jsx'
 import Celebration from '../../components/Celebration.jsx'
@@ -49,12 +49,24 @@ export default function EqualParts() {
   const [difficulty, setDifficulty] = useState('easy')
   // easy = "how many parts?", hard = "which shape shows 1/n?"
   const [question, setQuestion] = useState(() => randomQuestion('easy'))
+  const [choices, setChoices] = useState(() => {
+    const q = randomQuestion('easy')
+    return countChoices(q.parts)
+  })
+  const [shapeOpts, setShapeOpts] = useState(() => {
+    const q = randomQuestion('easy')
+    return shapeChoices(q.parts, q.shape, 'easy')
+  })
+
   const [selected, setSelected] = useState(null)
   const [feedback, setFeedback] = useState(null)
   const [celebrate, setCelebrate] = useState(false)
 
   const next = useCallback((diff = difficulty) => {
-    setQuestion(randomQuestion(diff))
+    const q = randomQuestion(diff)
+    setQuestion(q)
+    setChoices(countChoices(q.parts))
+    setShapeOpts(shapeChoices(q.parts, q.shape, diff))
     setSelected(null)
     setFeedback(null)
   }, [difficulty])
@@ -65,7 +77,7 @@ export default function EqualParts() {
   }
 
   // Easy mode: show divided shape, ask count
-  function handleCountGuess(opt) {
+  const handleCountGuess = useCallback((opt) => {
     if (feedback === 'correct') return
     setSelected(opt)
     if (parseInt(opt) === question.parts) {
@@ -76,10 +88,10 @@ export default function EqualParts() {
     } else {
       setFeedback('wrong')
     }
-  }
+  }, [feedback, next, question.parts, addStar])
 
   // Hard mode: show fraction label, ask which shape matches
-  function handleShapeGuess(opt) {
+  const handleShapeGuess = useCallback((opt) => {
     if (feedback === 'correct') return
     setSelected(opt)
     if (opt === `${question.parts}-${question.shape}`) {
@@ -90,7 +102,29 @@ export default function EqualParts() {
     } else {
       setFeedback('wrong')
     }
-  }
+  }, [feedback, next, question.parts, question.shape, addStar])
+
+  useEffect(() => {
+    function onKeyDown(e) {
+      if (feedback === 'correct') return
+      // 1-4 for either mode
+      if (e.key >= '1' && e.key <= '4') {
+        const idx = parseInt(e.key) - 1
+        if (difficulty === 'easy') {
+          if (choices[idx]) handleCountGuess(choices[idx])
+        } else {
+          const opt = shapeOpts[idx]
+          if (opt) handleShapeGuess(`${opt.parts}-${opt.shape}`)
+        }
+      }
+      // Also allow direct digit for easy mode
+      if (difficulty === 'easy' && choices.includes(e.key)) {
+        handleCountGuess(e.key)
+      }
+    }
+    window.addEventListener('keydown', onKeyDown)
+    return () => window.removeEventListener('keydown', onKeyDown)
+  }, [choices, difficulty, feedback, handleCountGuess, handleShapeGuess, shapeOpts])
 
   const ShapeComponent = question.shape === 'circle' ? DividedCircle : DividedRect
 
@@ -108,7 +142,7 @@ export default function EqualParts() {
             <ShapeComponent parts={question.parts} size={200} />
           </div>
           <div className="grid grid-cols-2 gap-3 w-full max-w-xs">
-            {countChoices(question.parts).map((opt) => {
+            {choices.map((opt) => {
               let style = 'bg-white border-2 border-sky-300 text-gray-800 hover:bg-sky-50'
               if (selected && opt === String(question.parts)) style = 'bg-green-400 border-green-400 text-white'
               else if (opt === selected && feedback === 'wrong') style = 'bg-red-300 border-red-300 text-white'
@@ -128,7 +162,7 @@ export default function EqualParts() {
           </p>
           <p className="text-4xl font-extrabold text-sky-700 mb-6">{FRACTION_LABELS[question.parts]}</p>
           <div className="grid grid-cols-2 gap-4 w-full max-w-sm">
-            {shapeChoices(question.parts, question.shape, difficulty).map(({ parts, shape }) => {
+            {shapeOpts.map(({ parts, shape }) => {
               const key = `${parts}-${shape}`
               const correctKey = `${question.parts}-${question.shape}`
               const Comp = shape === 'circle' ? DividedCircle : DividedRect

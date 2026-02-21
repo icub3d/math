@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import Layout from '../../components/Layout.jsx'
 import DifficultyToggle from '../../components/DifficultyToggle.jsx'
 import Celebration from '../../components/Celebration.jsx'
@@ -58,7 +58,7 @@ export default function TellTime() {
     next(d)
   }
 
-  function guess(option) {
+  const guess = useCallback((option) => {
     if (feedback === 'correct') return
     const correct = formatTime(choices.time.hour, choices.time.minute)
     setSelected(option)
@@ -73,7 +73,19 @@ export default function TellTime() {
     } else {
       setFeedback('wrong')
     }
-  }
+  }, [choices.time.hour, choices.time.minute, feedback, addStar, next])
+
+  useEffect(() => {
+    function onKeyDown(e) {
+      if (feedback === 'correct') return
+      if (e.key >= '1' && e.key <= '4') {
+        const idx = parseInt(e.key) - 1
+        if (choices.options[idx]) guess(choices.options[idx])
+      }
+    }
+    window.addEventListener('keydown', onKeyDown)
+    return () => window.removeEventListener('keydown', onKeyDown)
+  }, [choices.options, feedback, guess])
 
   const correctAnswer = formatTime(choices.time.hour, choices.time.minute)
 

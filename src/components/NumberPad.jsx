@@ -1,5 +1,3 @@
-import { useState } from 'react'
-
 export default function NumberPad({ value, onChange, onSubmit }) {
   function press(char) {
     if (char === '⌫') {
@@ -18,6 +16,8 @@ export default function NumberPad({ value, onChange, onSubmit }) {
       {keys.map((k) => (
         <button
           key={k}
+          type="button"
+          onMouseDown={(e) => e.preventDefault()}
           onClick={() => press(k)}
           aria-label={k === '⌫' ? 'backspace' : k === 'OK' ? 'submit' : k}
           className={`rounded-xl py-3 text-xl font-bold shadow transition-transform active:scale-95

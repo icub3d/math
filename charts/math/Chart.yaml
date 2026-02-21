@@ -1,0 +1,6 @@
+apiVersion: v2
+name: math
+description: A Helm chart for Math Practice web app
+type: application
+version: 0.1.0
+appVersion: "1.0.0"

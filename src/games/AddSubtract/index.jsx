@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useCallback, useRef, useEffect } from 'react'
 import Layout from '../../components/Layout.jsx'
 import NumberPad from '../../components/NumberPad.jsx'
 import DifficultyToggle from '../../components/DifficultyToggle.jsx'
@@ -17,6 +17,12 @@ export default function AddSubtract() {
   const [showHint, setShowHint] = useState(false)
   const [feedback, setFeedback] = useState(null) // null | 'correct' | 'wrong'
   const [celebrate, setCelebrate] = useState(false)
+  const inputRef = useRef(null)
+
+  // Keep input focused
+  useEffect(() => {
+    inputRef.current?.focus()
+  }, [problem, feedback])
 
   const nextProblem = useCallback((diff = difficulty) => {
     setProblem(generateProblem(diff))
@@ -42,23 +48,10 @@ export default function AddSubtract() {
         nextProblem()
       }, 1500)
     } else {
-      setScore((s) => ({ ...s, total: s.total + 1 }))
       setFeedback('wrong')
       setInput('')
     }
   }
-
-  // Allow keyboard entry
-  useEffect(() => {
-    function onKey(e) {
-      if (feedback === 'correct') return
-      if (e.key >= '0' && e.key <= '9') setInput((v) => (v.length < 4 ? v + e.key : v))
-      if (e.key === 'Backspace') setInput((v) => v.slice(0, -1))
-      if (e.key === 'Enter') submit()
-    }
-    window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
-  })
 
   return (
     <Layout title="➕➖ Add & Subtract" gameId={GAME_ID}>
@@ -73,16 +66,37 @@ export default function AddSubtract() {
       </div>
 
       {/* Answer input display */}
-      <div className={`text-5xl font-bold mb-4 h-14 flex items-center justify-center rounded-2xl w-48 border-4 transition-colors
-        ${feedback === 'wrong' ? 'border-red-400 bg-red-50 text-red-500' : 'border-sky-300 bg-white text-gray-800'}`}>
-        {input || <span className="text-gray-300">_ _ _ _</span>}
+      <div className="relative mb-4">
+        <input
+          ref={inputRef}
+          autoFocus
+          type="text"
+          inputMode="numeric"
+          pattern="[0-9]*"
+          value={input}
+          onChange={(e) => {
+            const val = e.target.value.replace(/[^0-9]/g, '').slice(0, 4)
+            if (feedback !== 'correct') setInput(val)
+          }}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' && feedback !== 'correct') submit()
+          }}
+          placeholder="_ _ _ _"
+          className={`text-5xl font-bold h-20 w-48 text-center rounded-2xl border-4 transition-colors outline-none
+            ${feedback === 'wrong' ? 'border-red-400 bg-red-50 text-red-500' : 'border-sky-300 bg-white text-gray-800 focus:border-sky-500 shadow-inner'}`}
+        />
+        {/* Visual cue for focus if needed */}
       </div>
 
       {feedback === 'wrong' && (
         <p className="text-red-500 font-bold text-lg mb-4">Not quite — try again! 💪</p>
       )}
 
-      <NumberPad value={input} onChange={setInput} onSubmit={submit} />
+      <NumberPad
+        value={input}
+        onChange={feedback === 'correct' ? () => {} : setInput}
+        onSubmit={feedback === 'correct' ? () => {} : submit}
+      />
 
       {/* Hint toggle */}
       <button
