@@ -5,15 +5,18 @@ import DifficultyToggle from '../../components/DifficultyToggle.jsx'
 import Celebration from '../../components/Celebration.jsx'
 import PlaceValueHint from './PlaceValueHint.jsx'
 import { generateProblem } from './problems.js'
+import { useStars } from '../../context/StarsContext.jsx'
+
+const GAME_ID = 'addition-subtraction'
 
 export default function AddSubtract() {
+  const { addStar } = useStars()
   const [difficulty, setDifficulty] = useState('easy')
   const [problem, setProblem] = useState(() => generateProblem('easy'))
   const [input, setInput] = useState('')
   const [showHint, setShowHint] = useState(false)
   const [feedback, setFeedback] = useState(null) // null | 'correct' | 'wrong'
   const [celebrate, setCelebrate] = useState(false)
-  const [score, setScore] = useState({ correct: 0, total: 0 })
 
   const nextProblem = useCallback((diff = difficulty) => {
     setProblem(generateProblem(diff))
@@ -31,7 +34,7 @@ export default function AddSubtract() {
     if (!input) return
     const guess = parseInt(input, 10)
     if (guess === problem.answer) {
-      setScore((s) => ({ correct: s.correct + 1, total: s.total + 1 }))
+      addStar(GAME_ID)
       setFeedback('correct')
       setCelebrate(true)
       setTimeout(() => {
@@ -58,7 +61,7 @@ export default function AddSubtract() {
   })
 
   return (
-    <Layout title="➕➖ Add & Subtract" score={score}>
+    <Layout title="➕➖ Add & Subtract" gameId={GAME_ID}>
       <Celebration show={celebrate} />
       <DifficultyToggle difficulty={difficulty} onChange={changeDifficulty} />
 

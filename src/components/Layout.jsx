@@ -1,4 +1,9 @@
-export default function Layout({ title, score, children }) {
+import { useStars } from '../context/StarsContext.jsx'
+
+export default function Layout({ title, gameId, children }) {
+  const { stars } = useStars()
+  const gameStars = gameId ? (stars[gameId] ?? 0) : null
+
   return (
     <div className="min-h-screen bg-sky-100 flex flex-col">
       <header className="bg-sky-500 text-white px-4 py-3 flex items-center justify-between shadow-md">
@@ -10,9 +15,9 @@ export default function Layout({ title, score, children }) {
           ← Menu
         </a>
         <h1 className="text-xl font-extrabold">{title}</h1>
-        {score != null ? (
+        {gameStars != null ? (
           <div className="bg-sky-600 rounded-xl px-3 py-1 text-sm font-bold">
-            ⭐ {score.correct}/{score.total}
+            ⭐ {gameStars}
           </div>
         ) : (
           <div className="w-16" />

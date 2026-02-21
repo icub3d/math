@@ -4,19 +4,22 @@ import NumberPad from '../../components/NumberPad.jsx'
 import DifficultyToggle from '../../components/DifficultyToggle.jsx'
 import Celebration from '../../components/Celebration.jsx'
 import allProblems from '../../data/wordProblems.js'
+import { useStars } from '../../context/StarsContext.jsx'
+
+const GAME_ID = 'word-problems'
 
 function shuffle(arr) {
   return [...arr].sort(() => Math.random() - 0.5)
 }
 
 export default function WordProblems() {
+  const { addStar } = useStars()
   const [difficulty, setDifficulty] = useState('easy')
   const [input, setInput] = useState('')
   const [tries, setTries] = useState(0)          // wrong attempts on current problem
   const [revealed, setRevealed] = useState(false)
   const [feedback, setFeedback] = useState(null) // null | 'correct' | 'wrong' | 'hint'
   const [celebrate, setCelebrate] = useState(false)
-  const [score, setScore] = useState({ correct: 0, total: 0 })
 
   const pool = useMemo(
     () => shuffle(allProblems.filter((p) => p.difficulty === difficulty)),
@@ -46,7 +49,7 @@ export default function WordProblems() {
     if (!input || revealed) return
     const guess = parseInt(input, 10)
     if (guess === problem.answer) {
-      setScore((s) => ({ correct: s.correct + 1, total: s.total + 1 }))
+      addStar(GAME_ID)
       setFeedback('correct')
       setCelebrate(true)
       setTimeout(() => {
@@ -59,7 +62,6 @@ export default function WordProblems() {
       setInput('')
       if (newTries >= 2) {
         // Reveal answer after 2 wrong attempts
-        setScore((s) => ({ ...s, total: s.total + 1 }))
         setRevealed(true)
         setFeedback('revealed')
       } else {
@@ -69,7 +71,7 @@ export default function WordProblems() {
   }
 
   return (
-    <Layout title="📖 Word Problems" score={score}>
+    <Layout title="📖 Word Problems" gameId={GAME_ID}>
       <Celebration show={celebrate} />
       <DifficultyToggle difficulty={difficulty} onChange={changeDifficulty} />
 

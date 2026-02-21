@@ -3,6 +3,9 @@ import Layout from '../../components/Layout.jsx'
 import DifficultyToggle from '../../components/DifficultyToggle.jsx'
 import Celebration from '../../components/Celebration.jsx'
 import AnalogClock from './AnalogClock.jsx'
+import { useStars } from '../../context/StarsContext.jsx'
+
+const GAME_ID = 'tell-time'
 
 // Valid minutes per difficulty: easy = :00 and :30, hard adds :15 and :45
 const MINUTES = { easy: [0, 30], hard: [0, 15, 30, 45] }
@@ -33,8 +36,8 @@ function buildChoices(hour, minute, difficulty) {
 }
 
 export default function TellTime() {
+  const { addStar } = useStars()
   const [difficulty, setDifficulty] = useState('easy')
-  const [time, setTime] = useState(() => randomTime('easy'))
   const [choices, setChoices] = useState(() => {
     const t = randomTime('easy')
     return { time: t, options: buildChoices(t.hour, t.minute, 'easy') }
@@ -42,7 +45,6 @@ export default function TellTime() {
   const [selected, setSelected] = useState(null)
   const [feedback, setFeedback] = useState(null)
   const [celebrate, setCelebrate] = useState(false)
-  const [score, setScore] = useState({ correct: 0, total: 0 })
 
   const next = useCallback((diff = difficulty) => {
     const t = randomTime(diff)
@@ -61,7 +63,7 @@ export default function TellTime() {
     const correct = formatTime(choices.time.hour, choices.time.minute)
     setSelected(option)
     if (option === correct) {
-      setScore((s) => ({ correct: s.correct + 1, total: s.total + 1 }))
+      addStar(GAME_ID)
       setFeedback('correct')
       setCelebrate(true)
       setTimeout(() => {
@@ -69,7 +71,6 @@ export default function TellTime() {
         next()
       }, 1800)
     } else {
-      setScore((s) => ({ ...s, total: s.total + 1 }))
       setFeedback('wrong')
     }
   }
@@ -77,7 +78,7 @@ export default function TellTime() {
   const correctAnswer = formatTime(choices.time.hour, choices.time.minute)
 
   return (
-    <Layout title="🕐 Tell Time" score={score}>
+    <Layout title="🕐 Tell Time" gameId={GAME_ID}>
       <Celebration show={celebrate} />
       <DifficultyToggle difficulty={difficulty} onChange={changeDifficulty} />
 
