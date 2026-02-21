@@ -5,24 +5,18 @@ import DifficultyToggle from '../../components/DifficultyToggle.jsx'
 import Celebration from '../../components/Celebration.jsx'
 import PlaceValueHint from './PlaceValueHint.jsx'
 import { generateProblem } from './problems.js'
-import { useStars } from '../../context/StarsContext.jsx'
+import { useUser } from '../../context/UserContext.jsx'
 
 const GAME_ID = 'addition-subtraction'
 
 export default function AddSubtract() {
-  const { addStar } = useStars()
-  const [difficulty, setDifficulty] = useState('2nd-easy')
-  const [problem, setProblem] = useState(() => generateProblem('2nd-easy'))
+  const { addStar, difficulty, setDifficulty } = useUser()
+  const [problem, setProblem] = useState(() => generateProblem(difficulty))
   const [input, setInput] = useState('')
   const [showHint, setShowHint] = useState(false)
   const [feedback, setFeedback] = useState(null) // null | 'correct' | 'wrong'
   const [celebrate, setCelebrate] = useState(false)
   const inputRef = useRef(null)
-
-  // Keep input focused
-  useEffect(() => {
-    inputRef.current?.focus()
-  }, [problem, feedback])
 
   const nextProblem = useCallback((diff = difficulty) => {
     setProblem(generateProblem(diff))
@@ -31,9 +25,13 @@ export default function AddSubtract() {
     setFeedback(null)
   }, [difficulty])
 
+  // Sync with global difficulty
+  useEffect(() => {
+    nextProblem(difficulty)
+  }, [difficulty, nextProblem])
+
   function changeDifficulty(d) {
     setDifficulty(d)
-    nextProblem(d)
   }
 
   function submit() {

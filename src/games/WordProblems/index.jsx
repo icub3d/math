@@ -4,7 +4,7 @@ import NumberPad from '../../components/NumberPad.jsx'
 import DifficultyToggle from '../../components/DifficultyToggle.jsx'
 import Celebration from '../../components/Celebration.jsx'
 import allProblems from '../../data/wordProblems.js'
-import { useStars } from '../../context/StarsContext.jsx'
+import { useUser } from '../../context/UserContext.jsx'
 
 const GAME_ID = 'word-problems'
 
@@ -13,19 +13,13 @@ function shuffle(arr) {
 }
 
 export default function WordProblems() {
-  const { addStar } = useStars()
-  const [difficulty, setDifficulty] = useState('2nd-easy')
+  const { addStar, difficulty, setDifficulty } = useUser()
   const [input, setInput] = useState('')
   const [tries, setTries] = useState(0)          // wrong attempts on current problem
   const [revealed, setRevealed] = useState(false)
   const [feedback, setFeedback] = useState(null) // null | 'correct' | 'wrong' | 'hint'
   const [celebrate, setCelebrate] = useState(false)
   const inputRef = useRef(null)
-
-  // Keep input focused when visible
-  useEffect(() => {
-    if (!revealed) inputRef.current?.focus()
-  }, [revealed, feedback])
 
   const pool = useMemo(
     () => shuffle(allProblems.filter((p) => p.difficulty === difficulty)),
@@ -42,13 +36,17 @@ export default function WordProblems() {
     setFeedback(null)
   }
 
-  function changeDifficulty(d) {
-    setDifficulty(d)
+  // Sync with global difficulty
+  useEffect(() => {
     setIndex(0)
     setInput('')
     setTries(0)
     setRevealed(false)
     setFeedback(null)
+  }, [difficulty])
+
+  function changeDifficulty(d) {
+    setDifficulty(d)
   }
 
   function submit() {

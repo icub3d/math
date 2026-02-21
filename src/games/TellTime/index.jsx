@@ -3,7 +3,7 @@ import Layout from '../../components/Layout.jsx'
 import DifficultyToggle from '../../components/DifficultyToggle.jsx'
 import Celebration from '../../components/Celebration.jsx'
 import AnalogClock from './AnalogClock.jsx'
-import { useStars } from '../../context/StarsContext.jsx'
+import { useUser } from '../../context/UserContext.jsx'
 
 const GAME_ID = 'tell-time'
 
@@ -36,11 +36,10 @@ function buildChoices(hour, minute, difficulty) {
 }
 
 export default function TellTime() {
-  const { addStar } = useStars()
-  const [difficulty, setDifficulty] = useState('2nd-easy')
+  const { addStar, difficulty, setDifficulty } = useUser()
   const [choices, setChoices] = useState(() => {
-    const t = randomTime('2nd-easy')
-    return { time: t, options: buildChoices(t.hour, t.minute, '2nd-easy') }
+    const t = randomTime(difficulty)
+    return { time: t, options: buildChoices(t.hour, t.minute, difficulty) }
   })
   const [selected, setSelected] = useState(null)
   const [feedback, setFeedback] = useState(null)
@@ -53,9 +52,13 @@ export default function TellTime() {
     setFeedback(null)
   }, [difficulty])
 
+  // Sync with global difficulty
+  useEffect(() => {
+    next(difficulty)
+  }, [difficulty, next])
+
   function changeDifficulty(d) {
     setDifficulty(d)
-    next(d)
   }
 
   const guess = useCallback((option) => {

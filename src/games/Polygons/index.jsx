@@ -2,7 +2,7 @@ import { useState, useCallback, useEffect } from 'react'
 import Layout from '../../components/Layout.jsx'
 import DifficultyToggle from '../../components/DifficultyToggle.jsx'
 import Celebration from '../../components/Celebration.jsx'
-import { useStars } from '../../context/StarsContext.jsx'
+import { useUser } from '../../context/UserContext.jsx'
 
 const GAME_ID = 'polygons'
 
@@ -52,10 +52,9 @@ function buildChoices(correctSides, difficulty) {
 }
 
 export default function Polygons() {
-  const { addStar } = useStars()
-  const [difficulty, setDifficulty] = useState('2nd-easy')
-  const [shape, setShape] = useState(() => randomShape('2nd-easy'))
-  const [choices, setChoices] = useState(() => buildChoices(randomShape('2nd-easy').sides, '2nd-easy'))
+  const { addStar, difficulty, setDifficulty } = useUser()
+  const [shape, setShape] = useState(() => randomShape(difficulty))
+  const [choices, setChoices] = useState(() => buildChoices(randomShape(difficulty).sides, difficulty))
   const [selected, setSelected] = useState(null)
   const [feedback, setFeedback] = useState(null)
   const [celebrate, setCelebrate] = useState(false)
@@ -70,9 +69,13 @@ export default function Polygons() {
     setShowHint(false)
   }, [difficulty])
 
+  // Sync with global difficulty
+  useEffect(() => {
+    next(difficulty)
+  }, [difficulty, next])
+
   function changeDifficulty(d) {
     setDifficulty(d)
-    next(d)
   }
 
   const guess = useCallback((option) => {

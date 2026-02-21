@@ -1,6 +1,6 @@
 import { Routes, Route, Link } from 'react-router-dom'
 import './index.css'
-import { useStars } from './context/StarsContext.jsx'
+import { useUser } from './context/UserContext.jsx'
 import AddSubtract from './games/AddSubtract/index.jsx'
 import WordProblems from './games/WordProblems/index.jsx'
 import TellTime from './games/TellTime/index.jsx'
@@ -18,7 +18,7 @@ const GAMES = [
 ]
 
 function Menu() {
-  const { totalStars, stars } = useStars()
+  const { totalStars, stars } = useUser()
   return (
     <div className="min-h-screen bg-sky-100 flex flex-col items-center py-10 px-4">
       <h1 className="text-5xl font-extrabold text-sky-700 mb-2">🌟 Math Fun! 🌟</h1>

@@ -3,7 +3,7 @@ import Layout from '../../components/Layout.jsx'
 import DifficultyToggle from '../../components/DifficultyToggle.jsx'
 import Celebration from '../../components/Celebration.jsx'
 import { DividedCircle, DividedRect } from './Shapes.jsx'
-import { useStars } from '../../context/StarsContext.jsx'
+import { useUser } from '../../context/UserContext.jsx'
 
 const GAME_ID = 'equal-parts'
 
@@ -45,17 +45,16 @@ function shapeChoices(correctParts, correctShape, difficulty) {
 }
 
 export default function EqualParts() {
-  const { addStar } = useStars()
-  const [difficulty, setDifficulty] = useState('2nd-easy')
+  const { addStar, difficulty, setDifficulty } = useUser()
   // 1st & 2nd-easy = "how many parts?", 2nd-hard = "which shape shows 1/n?"
-  const [question, setQuestion] = useState(() => randomQuestion('2nd-easy'))
+  const [question, setQuestion] = useState(() => randomQuestion(difficulty))
   const [choices, setChoices] = useState(() => {
-    const q = randomQuestion('2nd-easy')
+    const q = randomQuestion(difficulty)
     return countChoices(q.parts)
   })
   const [shapeOpts, setShapeOpts] = useState(() => {
-    const q = randomQuestion('2nd-easy')
-    return shapeChoices(q.parts, q.shape, '2nd-easy')
+    const q = randomQuestion(difficulty)
+    return shapeChoices(q.parts, q.shape, difficulty)
   })
 
   const [selected, setSelected] = useState(null)
@@ -71,9 +70,13 @@ export default function EqualParts() {
     setFeedback(null)
   }, [difficulty])
 
+  // Sync with global difficulty
+  useEffect(() => {
+    next(difficulty)
+  }, [difficulty, next])
+
   function changeDifficulty(d) {
     setDifficulty(d)
-    next(d)
   }
 
   // Easy mode: show divided shape, ask count

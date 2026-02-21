@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react'
 import Layout from '../../components/Layout.jsx'
 import Celebration from '../../components/Celebration.jsx'
 import DifficultyToggle from '../../components/DifficultyToggle.jsx'
-import { useStars } from '../../context/StarsContext.jsx'
+import { useUser } from '../../context/UserContext.jsx'
 import { generateAsteroidProblem } from './problems.js'
 
 const GAME_ID = 'asteroid-defender'
@@ -16,9 +16,8 @@ const STARS = Array.from({ length: 50 }).map((_, i) => ({
 }))
 
 export default function AsteroidDefender() {
-  const { addStar } = useStars()
+  const { addStar, difficulty, setDifficulty } = useUser()
   const [gameState, setGameState] = useState('menu')
-  const [difficulty, setDifficulty] = useState('2nd-easy')
   const [score, setScore] = useState(0)
   const [asteroids, setAsteroids] = useState([])
   const [input, setInput] = useState('')

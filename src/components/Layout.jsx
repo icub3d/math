@@ -1,7 +1,7 @@
-import { useStars } from '../context/StarsContext.jsx'
+import { useUser } from '../context/UserContext.jsx'
 
 export default function Layout({ title, gameId, children }) {
-  const { stars } = useStars()
+  const { stars } = useUser()
   const gameStars = gameId ? (stars[gameId] ?? 0) : null
 
   return (
