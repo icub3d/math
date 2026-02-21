@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: math-fun
+  labels:
+    app: math-fun
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: math-fun
+  template:
+    metadata:
+      labels:
+        app: math-fun
+    spec:
+      containers:
+        - name: math-fun
+          image: math-fun:latest
+          ports:
+            - containerPort: 8080
+          resources:
+            requests:
+              cpu: "50m"
+              memory: "64Mi"
+            limits:
+              cpu: "200m"
+              memory: "128Mi"
