@@ -11,8 +11,8 @@ const GAME_ID = 'addition-subtraction'
 
 export default function AddSubtract() {
   const { addStar } = useStars()
-  const [difficulty, setDifficulty] = useState('easy')
-  const [problem, setProblem] = useState(() => generateProblem('easy'))
+  const [difficulty, setDifficulty] = useState('2nd-easy')
+  const [problem, setProblem] = useState(() => generateProblem('2nd-easy'))
   const [input, setInput] = useState('')
   const [showHint, setShowHint] = useState(false)
   const [feedback, setFeedback] = useState(null) // null | 'correct' | 'wrong'

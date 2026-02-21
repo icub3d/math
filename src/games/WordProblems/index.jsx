@@ -14,7 +14,7 @@ function shuffle(arr) {
 
 export default function WordProblems() {
   const { addStar } = useStars()
-  const [difficulty, setDifficulty] = useState('easy')
+  const [difficulty, setDifficulty] = useState('2nd-easy')
   const [input, setInput] = useState('')
   const [tries, setTries] = useState(0)          // wrong attempts on current problem
   const [revealed, setRevealed] = useState(false)

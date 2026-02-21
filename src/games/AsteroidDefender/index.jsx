@@ -1,6 +1,7 @@
-import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import Layout from '../../components/Layout.jsx'
 import Celebration from '../../components/Celebration.jsx'
+import DifficultyToggle from '../../components/DifficultyToggle.jsx'
 import { useStars } from '../../context/StarsContext.jsx'
 import { generateAsteroidProblem } from './problems.js'
 
@@ -8,9 +9,16 @@ const GAME_ID = 'asteroid-defender'
 const SPAWN_INTERVAL_BASE = 4000 
 const SPEED_BASE = 0.06 // 0.06% per frame = ~16 seconds to cross screen
 
+const STARS = Array.from({ length: 50 }).map((_, i) => ({
+  id: i,
+  left: Math.random() * 100,
+  top: Math.random() * 100,
+}))
+
 export default function AsteroidDefender() {
   const { addStar } = useStars()
   const [gameState, setGameState] = useState('menu')
+  const [difficulty, setDifficulty] = useState('2nd-easy')
   const [score, setScore] = useState(0)
   const [asteroids, setAsteroids] = useState([])
   const [input, setInput] = useState('')
@@ -23,31 +31,8 @@ export default function AsteroidDefender() {
   const lastSpawnTime = useRef(0)
   const nextIdRef = useRef(1)
 
-  const stars = useMemo(() => Array.from({ length: 50 }).map((_, i) => ({
-    id: i,
-    left: Math.random() * 100,
-    top: Math.random() * 100,
-  })), [])
-
-  const endGame = useCallback(() => {
-    setGameState('gameOver')
-  }, [])
-
-  const startGame = () => {
-    setGameState('playing')
-    setScore(0)
-    scoreRef.current = 0
-    nextIdRef.current = 1
-    const first = createAsteroid(0)
-    asteroidsRef.current = [first]
-    setAsteroids([first])
-    setLastShot(null)
-    setInput('')
-    lastSpawnTime.current = Date.now()
-  }
-
-  function createAsteroid(s) {
-    const prob = generateAsteroidProblem(s)
+  const createAsteroid = useCallback((s, diff = difficulty) => {
+    const prob = generateAsteroidProblem(s, diff)
     return {
       id: nextIdRef.current++,
       x: Math.random() * 80 + 10,
@@ -58,6 +43,23 @@ export default function AsteroidDefender() {
       rotation: Math.random() * 360,
       rotSpeed: (Math.random() - 0.5) * 2,
     }
+  }, [difficulty])
+
+  const endGame = useCallback(() => {
+    setGameState('gameOver')
+  }, [])
+
+  const startGame = () => {
+    setGameState('playing')
+    setScore(0)
+    scoreRef.current = 0
+    nextIdRef.current = 1
+    const first = createAsteroid(0, difficulty)
+    asteroidsRef.current = [first]
+    setAsteroids([first])
+    setLastShot(null)
+    setInput('')
+    lastSpawnTime.current = Date.now()
   }
 
   const handleKeyDown = (e) => {
@@ -116,7 +118,7 @@ export default function AsteroidDefender() {
       const now = Date.now()
       if (now - lastSpawnTime.current > SPAWN_INTERVAL_BASE * spawnMult) {
         lastSpawnTime.current = now
-        next.push(createAsteroid(currentScore))
+        next.push(createAsteroid(currentScore, difficulty))
       }
 
       asteroidsRef.current = next
@@ -124,7 +126,7 @@ export default function AsteroidDefender() {
     }, 16) // ~60 FPS
 
     return () => clearInterval(interval)
-  }, [gameState, endGame])
+  }, [gameState, endGame, createAsteroid, difficulty])
 
   useEffect(() => {
     if (gameState === 'playing') inputRef.current?.focus()
@@ -136,7 +138,7 @@ export default function AsteroidDefender() {
       
       <div className="relative w-full max-w-2xl h-[600px] bg-slate-950 rounded-3xl overflow-hidden shadow-2xl border-4 border-slate-700">
         <div className="absolute inset-0 opacity-20 pointer-events-none">
-          {stars.map((s) => (
+          {STARS.map((s) => (
             <div key={s.id} className="absolute bg-white rounded-full w-1 h-1" 
                  style={{ left: `${s.left}%`, top: `${s.top}%` }} />
           ))}
@@ -145,6 +147,11 @@ export default function AsteroidDefender() {
         {gameState === 'menu' && (
           <div className="absolute inset-0 flex flex-col items-center justify-center bg-slate-900/90 z-20">
             <h2 className="text-5xl font-black text-yellow-400 mb-6 uppercase italic tracking-tighter">Asteroid Defender</h2>
+            
+            <div className="mb-8">
+              <DifficultyToggle difficulty={difficulty} onChange={setDifficulty} />
+            </div>
+
             <p className="text-blue-100 mb-10 text-center px-12 text-xl leading-relaxed">
               Solve the problems to blast the asteroids!<br/>
               Type the answer and press <span className="text-yellow-400 font-bold">ENTER</span>.

@@ -29,15 +29,20 @@ function pointsToSVG(pts) {
 }
 
 function randomShape(difficulty) {
-  const shape = SHAPES[Math.floor(Math.random() * SHAPES.length)]
+  const availableShapes = difficulty === '1st' 
+    ? SHAPES.slice(0, 2) // Just Triangle and Quadrilateral
+    : SHAPES
+  const shape = availableShapes[Math.floor(Math.random() * availableShapes.length)]
   const rotation = Math.random() * Math.PI * 2
   const color = COLORS[Math.floor(Math.random() * COLORS.length)]
-  const irregular = difficulty === 'hard'
+  const irregular = difficulty === '2nd-hard'
   return { ...shape, rotation, color, irregular, key: Math.random() }
 }
 
 function buildChoices(correctSides, difficulty) {
-  if (difficulty === 'easy') {
+  if (difficulty === '1st') {
+    return SHAPES.slice(0, 2).map((s) => s.name).sort(() => Math.random() - 0.5)
+  } else if (difficulty === '2nd-easy') {
     // Name choices
     return SHAPES.map((s) => s.name).sort(() => Math.random() - 0.5)
   } else {
@@ -48,9 +53,9 @@ function buildChoices(correctSides, difficulty) {
 
 export default function Polygons() {
   const { addStar } = useStars()
-  const [difficulty, setDifficulty] = useState('easy')
-  const [shape, setShape] = useState(() => randomShape('easy'))
-  const [choices, setChoices] = useState(() => buildChoices(randomShape('easy').sides, 'easy'))
+  const [difficulty, setDifficulty] = useState('2nd-easy')
+  const [shape, setShape] = useState(() => randomShape('2nd-easy'))
+  const [choices, setChoices] = useState(() => buildChoices(randomShape('2nd-easy').sides, '2nd-easy'))
   const [selected, setSelected] = useState(null)
   const [feedback, setFeedback] = useState(null)
   const [celebrate, setCelebrate] = useState(false)
@@ -72,7 +77,7 @@ export default function Polygons() {
 
   const guess = useCallback((option) => {
     if (feedback === 'correct') return
-    const correct = difficulty === 'easy' ? shape.name : String(shape.sides)
+    const correct = difficulty === '2nd-hard' ? String(shape.sides) : shape.name
     setSelected(option)
     if (option === correct) {
       addStar(GAME_ID)
@@ -96,7 +101,7 @@ export default function Polygons() {
         if (choices[idx]) guess(choices[idx])
       }
       // Also allow direct side count (3-6) if in hard mode
-      if (difficulty === 'hard' && e.key >= '3' && e.key <= '6') {
+      if (difficulty === '2nd-hard' && e.key >= '3' && e.key <= '6') {
         if (choices.includes(e.key)) guess(e.key)
       }
     }
@@ -106,7 +111,7 @@ export default function Polygons() {
 
   const cx = 110, cy = 110, r = 75
   const pts = polygonPoints(cx, cy, r, shape.sides, shape.rotation, shape.irregular)
-  const correct = difficulty === 'easy' ? shape.name : String(shape.sides)
+  const correct = difficulty === '2nd-hard' ? String(shape.sides) : shape.name
 
   return (
     <Layout title="🔷 Polygons" gameId={GAME_ID}>
@@ -114,7 +119,7 @@ export default function Polygons() {
       <DifficultyToggle difficulty={difficulty} onChange={changeDifficulty} />
 
       <p className="text-xl font-semibold text-gray-600 mb-4">
-        {difficulty === 'easy' ? 'What shape is this?' : 'How many sides does this shape have?'}
+        {difficulty === '2nd-hard' ? 'How many sides does this shape have?' : 'What shape is this?'}
       </p>
 
       {/* Shape display */}

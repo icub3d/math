@@ -7,8 +7,8 @@ import { useStars } from '../../context/StarsContext.jsx'
 
 const GAME_ID = 'tell-time'
 
-// Valid minutes per difficulty: easy = :00 and :30, hard adds :15 and :45
-const MINUTES = { easy: [0, 30], hard: [0, 15, 30, 45] }
+// Valid minutes per difficulty
+const MINUTES = { '1st': [0], '2nd-easy': [0, 30], '2nd-hard': [0, 15, 30, 45] }
 
 function randomTime(difficulty) {
   const mins = MINUTES[difficulty]
@@ -37,10 +37,10 @@ function buildChoices(hour, minute, difficulty) {
 
 export default function TellTime() {
   const { addStar } = useStars()
-  const [difficulty, setDifficulty] = useState('easy')
+  const [difficulty, setDifficulty] = useState('2nd-easy')
   const [choices, setChoices] = useState(() => {
-    const t = randomTime('easy')
-    return { time: t, options: buildChoices(t.hour, t.minute, 'easy') }
+    const t = randomTime('2nd-easy')
+    return { time: t, options: buildChoices(t.hour, t.minute, '2nd-easy') }
   })
   const [selected, setSelected] = useState(null)
   const [feedback, setFeedback] = useState(null)

@@ -1,16 +1,22 @@
 export default function DifficultyToggle({ difficulty, onChange }) {
+  const levels = [
+    { id: '1st', label: '🎒 1st Grade' },
+    { id: '2nd-easy', label: '😊 2nd - Easy' },
+    { id: '2nd-hard', label: '🔥 2nd - Hard' },
+  ]
+
   return (
-    <div className="flex gap-2 mb-6">
-      {['easy', 'hard'].map((d) => (
+    <div className="flex flex-wrap gap-2 mb-6">
+      {levels.map((lvl) => (
         <button
-          key={d}
-          onClick={() => onChange(d)}
-          className={`px-5 py-2 rounded-full font-bold capitalize transition-colors
-            ${difficulty === d
+          key={lvl.id}
+          onClick={() => onChange(lvl.id)}
+          className={`px-5 py-2 rounded-full font-bold transition-colors
+            ${difficulty === lvl.id
               ? 'bg-sky-500 text-white shadow'
               : 'bg-white text-sky-600 border border-sky-300 hover:bg-sky-50'}`}
         >
-          {d === 'easy' ? '😊 Easy' : '🔥 Hard'}
+          {lvl.label}
         </button>
       ))}
     </div>

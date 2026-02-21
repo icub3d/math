@@ -7,13 +7,13 @@ import { useStars } from '../../context/StarsContext.jsx'
 
 const GAME_ID = 'equal-parts'
 
-const PARTS_EASY = [2, 4]
-const PARTS_HARD = [2, 3, 4]
+const PARTS_1ST = [2, 4]
+const PARTS_2ND = [2, 3, 4]
 const PART_NAMES = { 2: 'halves', 3: 'thirds', 4: 'fourths' }
 const FRACTION_LABELS = { 2: '1/2', 3: '1/3', 4: '1/4' }
 
 function randomQuestion(difficulty) {
-  const partOptions = difficulty === 'easy' ? PARTS_EASY : PARTS_HARD
+  const partOptions = difficulty === '1st' ? PARTS_1ST : PARTS_2ND
   const parts = partOptions[Math.floor(Math.random() * partOptions.length)]
   const shape = Math.random() < 0.5 ? 'circle' : 'rectangle'
   return { parts, shape, key: Math.random() }
@@ -30,7 +30,7 @@ function countChoices(correct) {
 // Build 4 shape options for "which shape shows 1/n?" mode
 // Returns array of {parts, shape} with one correct
 function shapeChoices(correctParts, correctShape, difficulty) {
-  const partOptions = difficulty === 'easy' ? PARTS_EASY : PARTS_HARD
+  const partOptions = difficulty === '1st' ? PARTS_1ST : PARTS_2ND
   const shapes = ['circle', 'rectangle']
   const options = new Map()
   const correctKey = `${correctParts}-${correctShape}`
@@ -46,16 +46,16 @@ function shapeChoices(correctParts, correctShape, difficulty) {
 
 export default function EqualParts() {
   const { addStar } = useStars()
-  const [difficulty, setDifficulty] = useState('easy')
-  // easy = "how many parts?", hard = "which shape shows 1/n?"
-  const [question, setQuestion] = useState(() => randomQuestion('easy'))
+  const [difficulty, setDifficulty] = useState('2nd-easy')
+  // 1st & 2nd-easy = "how many parts?", 2nd-hard = "which shape shows 1/n?"
+  const [question, setQuestion] = useState(() => randomQuestion('2nd-easy'))
   const [choices, setChoices] = useState(() => {
-    const q = randomQuestion('easy')
+    const q = randomQuestion('2nd-easy')
     return countChoices(q.parts)
   })
   const [shapeOpts, setShapeOpts] = useState(() => {
-    const q = randomQuestion('easy')
-    return shapeChoices(q.parts, q.shape, 'easy')
+    const q = randomQuestion('2nd-easy')
+    return shapeChoices(q.parts, q.shape, '2nd-easy')
   })
 
   const [selected, setSelected] = useState(null)
@@ -110,7 +110,7 @@ export default function EqualParts() {
       // 1-4 for either mode
       if (e.key >= '1' && e.key <= '4') {
         const idx = parseInt(e.key) - 1
-        if (difficulty === 'easy') {
+        if (difficulty !== '2nd-hard') {
           if (choices[idx]) handleCountGuess(choices[idx])
         } else {
           const opt = shapeOpts[idx]
@@ -118,7 +118,7 @@ export default function EqualParts() {
         }
       }
       // Also allow direct digit for easy mode
-      if (difficulty === 'easy' && choices.includes(e.key)) {
+      if (difficulty !== '2nd-hard' && choices.includes(e.key)) {
         handleCountGuess(e.key)
       }
     }
@@ -133,7 +133,7 @@ export default function EqualParts() {
       <Celebration show={celebrate} />
       <DifficultyToggle difficulty={difficulty} onChange={changeDifficulty} />
 
-      {difficulty === 'easy' ? (
+      {difficulty !== '2nd-hard' ? (
         <>
           <p className="text-xl font-semibold text-gray-600 mb-6">
             How many equal parts does this shape have?
